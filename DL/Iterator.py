@@ -36,6 +36,6 @@ with open('outputfile_googlenet.csv', 'wb') as myfile:
         labels = np.loadtxt("models/placesCNN/categoryIndex_places205.csv", str, delimiter='\t')
         # print labels
         top_k = net.blobs['prob'].data[0].flatten().argsort()[-1:-6:-1]
-        wr.writerow([filename, str(labels[top_k])])
+        wr.writerow([filename, str(labels[top_k])])		#write the filename and the labels
         #print filename + ":\t"
         #print str(labels[top_k])
