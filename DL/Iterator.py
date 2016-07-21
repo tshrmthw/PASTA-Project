@@ -7,6 +7,7 @@ import csv
 # Set the computation mode CPU
 caffe.set_mode_cpu()
 
+# Load the net
 net = caffe.Net('models/googlenet_places205/deploy_places205.protxt',
                 'models/googlenet_places205/googlelet_places205_train_iter_2400000.caffemodel',
                 caffe.TEST)
