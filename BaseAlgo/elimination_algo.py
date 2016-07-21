@@ -24,7 +24,7 @@ delta = 0.01
 def tolerantelim(mu, eps, anothresh, rowlen, numrow, data):
     falsepos = []               # Matrix that will store the false positive count
     C = []                      # Matrix that will store the attributes to be returned
-    fin = []
+    fin = []                    # Matrix to store the position numbers of attributes
     for z in range(rowlen-1):
         falsepos.append(0)
         C.append(1)
