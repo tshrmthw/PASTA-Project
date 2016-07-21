@@ -31,7 +31,7 @@ with open('outputfile_googlenet.csv', 'wb') as myfile:
         im = caffe.io.load_image("images/Scenes/"+filename)
         net.blobs['data'].data[...] = transformer.preprocess('data', im)
 
-        #compute throught the net
+        #compute through the net
         out = net.forward()
 
         labels = np.loadtxt("models/placesCNN/categoryIndex_places205.csv", str, delimiter='\t')
