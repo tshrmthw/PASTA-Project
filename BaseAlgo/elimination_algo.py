@@ -54,8 +54,13 @@ def tolerantelim(mu, eps, anothresh, rowlen, numrow, data):
             fin.append(pos+1)
     return fin
 
-
-
+#####################################
+# funtion to create a list of lists 
+# which contains the rows of the 
+# attribute CSV along with the
+# PCA value appended at the end
+# May or may not need to pass the matrix
+######################################
 def create_matrix(filename, matrix = None):
     tmp=0
     header = []
@@ -88,8 +93,14 @@ def create_matrix(filename, matrix = None):
     rowcount -= 1   # to eliminate the header row that was counted
     return matrix, rowcount, rowlen, header
 
-
-
+###############################
+# funtion to count the number
+# images that we classify as
+# anomalies based on the rule
+# that has been created and found
+# by the last iteration of the
+# tolerant elimination algorithm
+################################
 def classifier_anocount( data, C):
     x = 0
     for row in data:
@@ -101,6 +112,28 @@ def classifier_anocount( data, C):
 
     return x
 
+########################################
+# Funtion to get the final error rate of 
+# of the classifier that is passed into 
+# it along with the attribute data matrix
+########################################
+def errorrate(matrix , classifier)
+      total_anomalies = 0.00
+      total_false_anomalies = 0.00
+      for row in matrix:
+          pca = len(row)-1
+          tmp = 0
+          for x in classifier:
+              tmp = bool(tmp) or bool(row[x] == '1')
+          if tmp:
+              total_anomalies+=1.00
+              # print row[pca]
+              if float(row[pca]) < 0.53:
+                  total_false_anomalies+=1.00
+          # elif (not tmp) and float(row[pca]) > 0.53:  # test to print out the 
+              # print str(row[pca])                     # anomaly scores of those 
+                                                        # images that rule did not pick up
+      return total_false_anomalies/total_anomalies 
 
 
 # Main Method
@@ -114,11 +147,9 @@ if __name__ == '__main__':
     # Run the first iteration of tolerant elimination and set the iternation number
     thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
     iternum = 1
-
-
     deltai = delta
 
-
+    # the major loop that executes in order to check if we have reached a favourable classification rule
     while ((float(classifier_anocount(matrix, thetest))/float(rowcount)) < (mu/(1+eta))):
         var1 = (3.0*pow(1.0+eta, 2+iternum)*log((2.0*iternum*(iternum+1.0))/delta))/(pow(eta, 2))
         var2 = (3.0*log(2.0*(rowlen-1)/deltai))/(mu*epsilon*(1.0+eta)*pow(eta, 2))
@@ -128,7 +159,7 @@ if __name__ == '__main__':
         print "mu : " + str(mu)
         print "Quaifying condition of while loop : " + str(classifier_anocount(matrix, thetest)/float(rowcount)) +\
               " is less than " + str((mu/(1+eta)))
-
+        # Boundarycheck conditions based on theoretical calculations for validity
         if rowcount > var1 and rowcount > var2:
             mu = (mu / (1.0 + eta))
             deltai = deltai/(iternum*(iternum+1))
@@ -136,37 +167,21 @@ if __name__ == '__main__':
             thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
             print "The attributes remaining in the formula are : " + str(thetest)
         else:
-            #if iternum == 1:
             raise ValueError('An Optimal Classifier could not be found!!!!')
             break
-
+    # Create a list which contains the labels that are a part of the rule that was found
     finalclassifier = []
     for count in thetest:
         finalclassifier.append(labels[count])
-
+    
+    
+    # printing out the results
     print "\n--------------A RESULT HAS BEEN FOUND!!!!!!---------------"
     print "Out of " + str(len(labels)-1) + " attributes, " + str(len(finalclassifier)) + " attriutes are in the final" \
                                                                                          " classifier"
     print "Last known classifier is : " + str(finalclassifier)
     print "Algorithm went through " + str(iternum) + " iterations"
     print "The probability of striking an image as anomaly is : " + str(mu)
-
-    total_anomalies = 0.00
-    total_false_anomalies = 0.00
-    for row in matrix:
-        pca = len(row)-1
-        tmp = 0
-        for x in thetest:
-            tmp = bool(tmp) or bool(row[x] == '1')
-        if tmp:
-            total_anomalies+=1.00
-            # print row[pca]
-            if float(row[pca]) < 0.53:
-                total_false_anomalies+=1.00
-        elif (not tmp) and float(row[pca]) > 0.53:
-            print str(row[pca])
-
-    print "The Error rate is : " + str(total_false_anomalies/total_anomalies)
-    print total_false_anomalies
-    print total_anomalies
+    print "The Error rate is : " + str(errorrate(matrix , thetest))
+         
 
