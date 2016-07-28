@@ -1,18 +1,22 @@
 import csv
 from math import pow,log
 from codecs import open
-import random
 
 
 #####################################
 # Initialization Variables
-mu = 0.4
-epsilon = 0.017            # for 21656 use 0.027, 269 = 0.17
-                            # fraction of epsilon that we can classify as anomaly (0.06-0.1)
-anomalythreshold = 0.53
-eta = 2    #0.2
-delta = 0.05
-# mu = (1.00+epsilon)*0.04
+def varinit():
+  global mu
+  mu = 0.4
+  global epsilon           # for 21656 use 0.027, 269 = 0.17
+  epsilon = 0.017  # fraction of epsilon that we can classify as anomaly (0.06-0.1)
+  global anomalythreshold
+  anomalythreshold = 0.53
+  global eta #0.2
+  eta = 2
+  global delta
+  delta = 0.05
+  # global mu = (1.00+epsilon)*0.04
 #####################################
 
 ########################################################
@@ -98,66 +102,71 @@ def classifier_anocount( data, C):
     return x
 
 
-# Get the data as matrices
-matrix, rowcount, rowlen, labels= create_matrix('269/binary-269.csv')
-matrix, elim1, elim2 , elim3= create_matrix('269/PCA-269.csv', matrix)
 
-# Run the first iteration of tolerant elimination and set the iternation number
-thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
-iternum = 1
+# Main Method
+if __name__ == '__main__':
+    "This code runs when you invoke the script from the command line"
+    # Get the data as matrices
+    varinit()
+    matrix, rowcount, rowlen, labels= create_matrix('269/binary-269.csv')
+    matrix, elim1, elim2 , elim3= create_matrix('269/PCA-269.csv', matrix)
+
+    # Run the first iteration of tolerant elimination and set the iternation number
+    thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
+    iternum = 1
 
 
-deltai = delta
+    deltai = delta
 
 
-while ((float(classifier_anocount(matrix, thetest))/float(rowcount)) < (mu/(1+eta))):
-    var1 = (3.0*pow(1.0+eta, 2+iternum)*log((2.0*iternum*(iternum+1.0))/delta))/(pow(eta, 2))
-    var2 = (3.0*log(2.0*(rowlen-1)/deltai))/(mu*epsilon*(1.0+eta)*pow(eta, 2))
-    print "The iteration number is : " + str(iternum)
-    print "Variable 1 is : " + str(var1)
-    print "Variable 2 is : " + str(var2)
-    print "mu : " + str(mu)
-    print "Quaifying condition of while loop : " + str(classifier_anocount(matrix, thetest)/float(rowcount)) +\
-          " is less than " + str((mu/(1+eta)))
+    while ((float(classifier_anocount(matrix, thetest))/float(rowcount)) < (mu/(1+eta))):
+        var1 = (3.0*pow(1.0+eta, 2+iternum)*log((2.0*iternum*(iternum+1.0))/delta))/(pow(eta, 2))
+        var2 = (3.0*log(2.0*(rowlen-1)/deltai))/(mu*epsilon*(1.0+eta)*pow(eta, 2))
+        print "The iteration number is : " + str(iternum)
+        print "Variable 1 is : " + str(var1)
+        print "Variable 2 is : " + str(var2)
+        print "mu : " + str(mu)
+        print "Quaifying condition of while loop : " + str(classifier_anocount(matrix, thetest)/float(rowcount)) +\
+              " is less than " + str((mu/(1+eta)))
 
-    if rowcount > var1 and rowcount > var2:
-        mu = (mu / (1.0 + eta))
-        deltai = deltai/(iternum*(iternum+1))
-        iternum += 1
-        thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
-        print "The attributes remaining in the formula are : " + str(thetest)
-    else:
-        #if iternum == 1:
-        raise ValueError('An Optimal Classifier could not be found!!!!')
-        break
+        if rowcount > var1 and rowcount > var2:
+            mu = (mu / (1.0 + eta))
+            deltai = deltai/(iternum*(iternum+1))
+            iternum += 1
+            thetest = tolerantelim(mu, epsilon, anomalythreshold, rowlen, rowcount, matrix)
+            print "The attributes remaining in the formula are : " + str(thetest)
+        else:
+            #if iternum == 1:
+            raise ValueError('An Optimal Classifier could not be found!!!!')
+            break
 
-finalclassifier = []
-for count in thetest:
-    finalclassifier.append(labels[count])
+    finalclassifier = []
+    for count in thetest:
+        finalclassifier.append(labels[count])
 
-print "\n--------------A RESULT HAS BEEN FOUND!!!!!!---------------"
-print "Out of " + str(len(labels)-1) + " attributes, " + str(len(finalclassifier)) + " attriutes are in the final" \
-                                                                                     " classifier"
-print "Last known classifier is : " + str(finalclassifier)
-print "Algorithm went through " + str(iternum) + " iterations"
-print "The probability of striking an image as anomaly is : " + str(mu)
+    print "\n--------------A RESULT HAS BEEN FOUND!!!!!!---------------"
+    print "Out of " + str(len(labels)-1) + " attributes, " + str(len(finalclassifier)) + " attriutes are in the final" \
+                                                                                         " classifier"
+    print "Last known classifier is : " + str(finalclassifier)
+    print "Algorithm went through " + str(iternum) + " iterations"
+    print "The probability of striking an image as anomaly is : " + str(mu)
 
-total_anomalies = 0.00
-total_false_anomalies = 0.00
-for row in matrix:
-    pca = len(row)-1
-    tmp = 0
-    for x in thetest:
-        tmp = bool(tmp) or bool(row[x] == '1')
-    if tmp:
-        total_anomalies+=1.00
-        # print row[pca]
-        if float(row[pca]) < 0.53:
-            total_false_anomalies+=1.00
-    elif (not tmp) and float(row[pca]) > 0.53:
-        print str(row[pca])
+    total_anomalies = 0.00
+    total_false_anomalies = 0.00
+    for row in matrix:
+        pca = len(row)-1
+        tmp = 0
+        for x in thetest:
+            tmp = bool(tmp) or bool(row[x] == '1')
+        if tmp:
+            total_anomalies+=1.00
+            # print row[pca]
+            if float(row[pca]) < 0.53:
+                total_false_anomalies+=1.00
+        elif (not tmp) and float(row[pca]) > 0.53:
+            print str(row[pca])
 
-print "The Error rate is : " + str(total_false_anomalies/total_anomalies)
-print total_false_anomalies
-print total_anomalies
+    print "The Error rate is : " + str(total_false_anomalies/total_anomalies)
+    print total_false_anomalies
+    print total_anomalies
 
