@@ -1,2 +1,1 @@
-# PASTA-Project
-PASTA-Attaching Semantics To Anomalies
+# PASTA-Attaching Semantics To Anomalies
