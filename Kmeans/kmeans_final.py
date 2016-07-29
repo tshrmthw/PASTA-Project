@@ -8,11 +8,6 @@ import os
 import matplotlib.pyplot as plt
 
 
-"""
-https://gist.github.com/iandanforth/5862470
-
-"""
-
 folder = "/home/tushar/PycharmProjects/Test/Kmeans/Camview"
 #create a black jpg and get hashcode
 img = np.zeros([100,100,3],dtype=np.uint8)
