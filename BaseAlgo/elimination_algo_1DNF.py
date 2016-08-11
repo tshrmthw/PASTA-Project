@@ -117,7 +117,7 @@ def classifier_anocount( data, C):
 # of the classifier that is passed into 
 # it along with the attribute data matrix
 ########################################
-def errorrate(matrix , classifier)
+def errorrate(matrix , classifier):
       total_anomalies = 0.00
       total_false_anomalies = 0.00
       for row in matrix:
